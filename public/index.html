@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tela de Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <label for="username">Nome de Usuário:</label>
+    <input type="text" id="username">
+    <br>
+    <label for="email">E-mail:</label>
+    <input type="email" id="email">
+    <br>
+    <label for="password">Senha:</label>
+    <input type="password" id="password">
+    <br>
+    <button onclick="main()" style="display: none;">Iniciar Leitura do Joystick</button>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/aws-iot-device-sdk/dist/aws-iot-device-sdk.min.js"></script> -->
+    <script src="Joystick.js"></script>
+    <!-- <script src="IotService.js"></script> -->
+    <script src="Main.js"></script>
+    <br>
+    <button onclick="login()">Login</button>
+    <script src="loginService.js"></script>
+</body>
+</html>
