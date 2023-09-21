@@ -157,7 +157,7 @@ class Joystick {
         if (JSON.stringify(changes) !== "{}") {
             // Imprime o JSON no terminal
             console.log("JSON a ser enviado: ", JSON.stringify(changes));
-            sendStateToAPI(changes);
+            // sendStateToAPI(changes);
         }
     }
 
