@@ -48,10 +48,8 @@ class Joystick {
                 // Atualiza o último estado enviado com o estado atual completo
                 // O ultimo estado enviado é usado para verificar se a proxima alteração será relevante
                 this.lastSentState = {
-                    manche: {
                     velX: this.axes[0],
                     velY: this.axes[1],
-                    },
                     las: this.buttons[10].pressed,
                     trig: this.buttons[11].pressed,
                 };
@@ -81,8 +79,8 @@ class Joystick {
         }
     
         // Compara os eixos
-        if (Math.abs(newAxes[0] - this.lastSentState.manche.velX) > this.deadzone ||
-            Math.abs(newAxes[1] - this.lastSentState.manche.velY) > this.deadzone) {
+        if (Math.abs(newAxes[0] - this.lastSentState.velX) > this.deadzone ||
+            Math.abs(newAxes[1] - this.lastSentState.velY) > this.deadzone) {
             return true; // alterações relevantes
         }
     
@@ -108,10 +106,27 @@ class Joystick {
         if (newButtons[10].pressed !== this.lastSentState.las || newButtons[11].pressed !== this.lastSentState.trig) {
             return true;
         }
-    
+        
         return false; // Não houve alterações relevantes nos botões
     }
     
+    /**
+     * Aqui já temos o JSON pronto para ser enviado
+     * TO-DO: Conectar com a AWS e enviar o JSON para um tópico
+     */
+    sendStateToAPI(JSON) {
+        // send load to localhost:3000/iot post request
+        fetch('http://localhost:3000/iot', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body:
+            JSON.stringify({ ...JSON, topic: "/teste/x/pub" }),
+        })
+
+    }
+
     /**
      * Monta o JSON para ser enviado a API, imprime o JSON no terminal
      */
@@ -121,22 +136,17 @@ class Joystick {
     
         if (this.lastSentState) {
             // Compara o estado atual com o último estado enviado
-            if (Math.abs(this.axes[0] - this.lastSentState.manche.velX) > this.deadzone) {
+            if (Math.abs(this.axes[0] - this.lastSentState.velX) > this.deadzone) {
 
-                changes.manche = {
-                    velX: Math.round(this.axes[0] * 100),
-                };
+                changes.velX = Math.round(this.axes[0] * 100);
 
-                if (Math.abs(changes.manche.velX) <= this.deadzone * 100) {changes.manche.velX = 0}
+                if (Math.abs(changes.velX) <= this.deadzone * 100) {changes.velX = 0}
             }
-            if (Math.abs(this.axes[1] - this.lastSentState.manche.velY) > this.deadzone) {
+            if (Math.abs(this.axes[1] - this.lastSentState.velY) > this.deadzone) {
                 
-                changes.manche = {
-                ...changes.manche,
-                velY: Math.round(this.axes[1] * 100),
-                };
+                changes.velY = Math.round(this.axes[1] * 100);
 
-                if (Math.abs(changes.manche.velY) <= this.deadzone * 100) {changes.manche.velY = 0}
+                if (Math.abs(changes.velY) <= this.deadzone * 100) {changes.velY = 0}
             }
             if (this.buttons[10].pressed !== this.lastSentState.las) {
                 changes.las = this.buttons[10].pressed;
@@ -146,10 +156,9 @@ class Joystick {
             }
         } else {
             // Se não houver um estado anterior, envie o estado atual completo
-            changes.manche = {
-                velX: Math.round(this.axes[0] * 100),
-                velY: Math.round(this.axes[1] * 100),
-            };
+            changes.velX = Math.round(this.axes[0] * 100),
+            changes.velY = Math.round(this.axes[1] * 100),
+
             changes.las = this.buttons[10].pressed;
             changes.trig = this.buttons[11].pressed;
         }
@@ -157,15 +166,25 @@ class Joystick {
         if (JSON.stringify(changes) !== "{}") {
             // Imprime o JSON no terminal
             console.log("JSON a ser enviado: ", JSON.stringify(changes));
-            // sendStateToAPI(changes);
+            // this.sendStateToAPI(changes);
+
+            
+            const message = {
+                message: changes,
+                topic: "/teste/x/sub"
+            };
+            
+            console.log("JSON com topico: ", JSON.stringify(message));
+            
+            fetch('http://localhost:3000/iot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                // mode: 'no-cors', // Enable no-cors mode
+                body: JSON.stringify(message)
+            })
         }
     }
 
-    /**
-     * Aqui já temos o JSON pronto para ser enviado
-     * TO-DO: Conectar com a AWS e enviar o JSON para um tópico
-     */
-    sendStateToAPI(JSON){
-        
-    }
 }
